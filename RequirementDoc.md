@@ -54,3 +54,4 @@
 　　系统的平台要求:<br>
 　　本系统只能在Window系统平台下安装和使用，.Net版本要求4.5及以上。
 #4 术语表
+![](http://i.imgur.com/lCsES5W.png)
