@@ -31,7 +31,7 @@ namespace CalC
             Console.WriteLine("-a表示用户是否输入答案（1输入，0不输入）");
             Console.WriteLine("-c表示是否显示正确答案（1显示，0不显示）");
             Console.WriteLine("-t表示是否生成题目文件（1生成，0不生成)");
-            Console.WriteLine("-m表示文件生成题目的数量（若生成题目文件该参数必须输入,否则不输入）");
+            Console.WriteLine("-m表示文件生成题目的数量（若生成题目文件此参数必须输入,否则不输入）");
             try
             {
                 if (args.Length != 8 && args.Length != 10)
