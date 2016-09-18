@@ -27,27 +27,65 @@ namespace CalC
 
         static void Main(string[] args)
         {
-            int input = 1;
-            while (input == 1)
+            Console.WriteLine("-n表示生成四则算式的数目");
+            Console.WriteLine("-a表示用户是否输入答案（1输入，0不输入）");
+            Console.WriteLine("-c表示是否显示正确答案（1显示，0不显示）");
+            Console.WriteLine("-t表示是否生成题目文件（1生成，0不生成)");
+            Console.WriteLine("-m表示文件生成题目的数量（若生成题目文件此参数必须输入,否则不输入）");
+            try
             {
-                Console.Write("请输入生成四则运算题的数目: ");
-                int numOfQue = int.Parse(Console.ReadLine());
+                if (args.Length != 8 && args.Length != 10)
+                    throw new Exception("参数数目不正确");
+                else if (args.Length == 8)
+                {
+                    if (args[0] != "-n" || args[2] != "-a" || args[4] != "-c" || args[6] != "-t")
+                        throw new Exception("参数名称不正确");
+                    if (int.Parse(args[1]) <= 0)
+                        throw new Exception("题目数必须为正");
+                    if (int.Parse(args[7]) == 1)
+                        throw new Exception("参数数目不正确");
+                    if ((int.Parse(args[3]) != 0 && int.Parse(args[3]) != 1) ||
+                            (int.Parse(args[5]) != 0 && int.Parse(args[5]) != 1))
+                        throw new Exception("参数值必须为0或1");
+                }
+                else
+                {
+                    if (args[0] != "-n" || args[2] != "-a" || args[4] != "-c" || args[6] != "-t" || args[8] != "-m")
+                        throw new Exception("参数名称不正确");
+                    if (int.Parse(args[1]) <= 0 || int.Parse(args[9]) <= 0)
+                        throw new Exception("题目数必须为正");
+                    if (int.Parse(args[7]) == 0)
+                        throw new Exception("参数数目不正确");
+                    if ((int.Parse(args[3]) != 0 && int.Parse(args[3]) != 1) ||
+                            (int.Parse(args[5]) != 0 && int.Parse(args[5]) != 1))
+                        throw new Exception("参数值必须为0或1");
+                }
+
+                int numOfQue = int.Parse(args[1]);
                 string[] inputAnswer = new string[numOfQue];
                 string[] correctAnswer = new string[numOfQue];
                 string[] ques = new string[numOfQue];
                 List<string> result = new List<string>();
                 for (int i = 0; i < numOfQue; i++)
                 {
+
                     result = produceQue();
                     ques[i] = result[0];
-                 
-                    correctAnswer[i] = Calucate(result);
+                    try
+                    {
+                        correctAnswer[i] = Calculate(result);
+                        Console.WriteLine("{0,-20}", ques[i] + operators[4] + space);
+                    }
+                    catch (FractionException e)
+                    {
+                        i--;
+                    }
                 }
                 Console.WriteLine();
-                Console.Write("是否输入答案(输入1表示用户输入答案，否则不输入): ");
-                input = int.Parse(Console.ReadLine());
+                int input = int.Parse(args[3]);
                 if (input == 1)
                 {
+                    Console.Write("输入答案： ");
                     for (int i = 0; i < numOfQue; i++)
                     {
                         Console.Write("{0,-20}", ques[i] + operators[4] + space);
@@ -62,40 +100,38 @@ namespace CalC
                     }
                     Console.WriteLine("您共答对" + numOfCorrect + "道题");
                 }
-
-
-                Console.Write("是否显示正确答案(输入1表示显示正确答案，否则不显示): ");
-                input = int.Parse(Console.ReadLine());
+                input = int.Parse(args[5]);
                 if (input == 1)
                 {
+                    Console.Write("正确答案: ");
                     for (int i = 0; i < numOfQue; i++)
                         Console.Write("{0,-20}", ques[i] + operators[4] + space + correctAnswer[i]);
                     Console.WriteLine();
                 }
-                Console.Write("是否继续生成四则运算题的数目(输入1继续生成，否则不生成): ");
-                input = int.Parse(Console.ReadLine());
-                Console.Clear();
-            }
 
-            Console.Write("是否生成题目文件(输入1生成，否则不生成): ");
-            input = int.Parse(Console.ReadLine());
-            if (input == 1)
-            {
-                Console.Write("输入生成题目的数量: ");
-                string filename = "que.txt";//这里是你的已知文件
-                FileStream fs = File.Create(filename);  //创建文件
-                fs.Close();
-                StreamWriter sw = new StreamWriter(filename);
-                input = int.Parse(Console.ReadLine());
-                for (int i = 0; i < input; i++)
+                input = int.Parse(args[7]);
+                if (input == 1)
                 {
-                    string que = "";
-                    que = produceQue()[0];
-                    sw.Write("{0,-20}",que + operators[4] + space);
-                    if (i % 10 == 9)
-                        sw.Write("\r\n");
+                    string filename = "que.txt";//这里是你的已知文件
+                    FileStream fs = File.Create(filename);  //创建文件
+                    fs.Close();
+                    StreamWriter sw = new StreamWriter(filename);
+                    input = int.Parse(args[9]);
+                    for (int i = 0; i < input; i++)
+                    {
+                        string que = "";
+                        que = produceQue()[0];
+                        sw.Write("{0,-20}", que + operators[4] + space);
+                        if (i % 10 == 9)
+                            sw.Write("\r\n");
+                    }
+                    sw.Close();
                 }
-                sw.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("请输入正确参数");
             }
         }
 
@@ -132,6 +168,17 @@ namespace CalC
                 start[i] = ran.Next(1, count + 1);
                 end[i] = ran.Next(start[i] + 1, count + 2);
             }
+            for (int i = 0; i < numOfBrackets; i++)
+            {
+                for (int m = 0; m < numOfBrackets; m++)
+                {
+                    if (start[i] == end[m])
+                    {
+                        start[i] = -1;
+                        end[m] = -1;
+                    }
+                }
+            }
             int j = 1;
             for (int i = 0; i < count + 1; i++)
             {
@@ -145,15 +192,21 @@ namespace CalC
             }
             for (int i = 0; i < numOfBrackets; i++)
             {
-                int left = isOperand.FindIndex(s=>s==start[i]);
-                str.Insert(left, "(");
-                isOperand.Insert(left, -1);
-                int right = isOperand.FindIndex(s =>s==end[i]);
-                str.Insert(right + 1, ")");
-                isOperand.Insert(right + 1, -1);
+                if (start[i] != -1)
+                {
+                    int left = isOperand.FindIndex(s => s == start[i]);
+                    str.Insert(left, "(");
+                    isOperand.Insert(left, -1);
+                }
+                if (end[i] != -1)
+                {
+                    int right = isOperand.FindIndex(s => s == end[i]);
+                    str.Insert(right + 1, ")");
+                    isOperand.Insert(right + 1, -1);
+                }
             }
             str.Insert(0, "");
-            for (int i = 1; i < str.Count;)
+            for (int i = 1; i < str.Count; )
             {
                 str[0] += str[i++] + space;
             }
@@ -167,11 +220,16 @@ namespace CalC
         {
             switch (op)
             {
-                case 0: return leftNum + rightNum;
-                case 1: return leftNum - rightNum;
-                case 2: return leftNum * rightNum;
-                case 3: return leftNum / rightNum;
-                default: return "";
+                case 0:
+                    return leftNum + rightNum;
+                case 1:
+                    return leftNum - rightNum;
+                case 2:
+                    return leftNum * rightNum;
+                case 3:
+                    return leftNum / rightNum;
+                default:
+                    return "";
             }
         }
 
@@ -243,7 +301,7 @@ namespace CalC
             return result;
         }
 
-        static string Calucate(List<string> expression)
+        static string Calculate(List<string> expression)
         {
 
             var rpn = PreOrderToPostOrder(expression);

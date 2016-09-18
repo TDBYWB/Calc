@@ -147,9 +147,10 @@ while input0 == 1:
     ques = []
     result =[]
     for i in range(numOfQue):
-        result = produceQue()
-        ques.append(result[0])
-        print(result[0]+space+operators[4]+space+str(Calculate(result)))
+       result = produceQue()
+       ques.append(result[0])
+       print()
+       print(result[0]+space+operators[4]+space+str(Calculate(result)))
 
 
 
